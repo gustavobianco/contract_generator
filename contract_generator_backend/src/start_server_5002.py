@@ -24,9 +24,29 @@ jwt = JWTManager(app)
 app.register_blueprint(user_bp, url_prefix='/api')
 app.register_blueprint(cnpj_bp, url_prefix='/api')
 
-# Configuração do banco de dados
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(os.path.dirname(__file__), 'database', 'app.db')}"
+# Configuração do banco de dados MySQL
+# Para desenvolvimento local, use as variáveis de ambiente ou valores padrão
+mysql_user = os.environ.get('MYSQL_USER', 'root')
+mysql_password = os.environ.get('MYSQL_PASSWORD', 'password')
+mysql_host = os.environ.get('MYSQL_HOST', 'localhost')
+mysql_port = os.environ.get('MYSQL_PORT', '3306')
+mysql_database = os.environ.get('MYSQL_DATABASE', 'contract_generator')
+
+# String de conexão MySQL
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_database}?charset=utf8mb4"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Configurações específicas do MySQL
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+    'connect_args': {
+        'charset': 'utf8mb4',
+        'use_unicode': True,
+        'autocommit': True
+    }
+}
+
 db.init_app(app)
 
 # Criar diretório para PDFs se não existir

@@ -50,7 +50,7 @@ const CNPJConsulta = ({ onBack }) => {
         return;
       }
 
-      const response = await fetch(`http://localhost:5002/api/cnpj/${cleanCNPJ}`, {
+      const response = await fetch(`https://biancomeister.pythonanywhere.com/api/cnpj/${cleanCNPJ}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

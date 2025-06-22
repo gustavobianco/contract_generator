@@ -1,0 +1,79 @@
+# Arquivo de serviço systemd para o Gerador de Contratos e Procurações
+# Arquivo: /etc/systemd/system/contract-generator.service
+
+[Unit]
+Description=Gunicorn instance to serve Contract Generator
+Documentation=https://docs.gunicorn.org/
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+User=ubuntu
+Group=ubuntu
+RuntimeDirectory=contract-generator
+WorkingDirectory=/home/ubuntu/contract_generator_backend
+Environment="PATH=/home/ubuntu/contract_generator_backend/venv/bin"
+Environment="PYTHONPATH=/home/ubuntu/contract_generator_backend"
+Environment="FLASK_ENV=production"
+Environment="FLASK_DEBUG=False"
+
+# Comando para iniciar o Gunicorn
+ExecStart=/home/ubuntu/contract_generator_backend/venv/bin/gunicorn \
+    --config gunicorn.conf.py \
+    --bind 127.0.0.1:8000 \
+    --workers 4 \
+    --worker-class sync \
+    --worker-connections 1000 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --timeout 30 \
+    --keepalive 2 \
+    --preload \
+    --access-logfile /var/log/gunicorn/access.log \
+    --error-logfile /var/log/gunicorn/error.log \
+    --log-level info \
+    --capture-output \
+    wsgi:application
+
+# Comando para recarregar graciosamente
+ExecReload=/bin/kill -s HUP $MAINPID
+
+# Configurações de reinicialização
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Configurações de recursos
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Configurações de segurança
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/ubuntu/contract_generator_backend
+ReadWritePaths=/var/log/gunicorn
+ReadWritePaths=/tmp
+
+# Configurações de rede
+PrivateNetwork=false
+
+# Configurações de timeout
+TimeoutStartSec=60
+TimeoutStopSec=30
+TimeoutReloadSec=30
+
+# Configurações de notificação
+NotifyAccess=all
+
+# Configurações de logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=contract-generator
+
+[Install]
+WantedBy=multi-user.target
+

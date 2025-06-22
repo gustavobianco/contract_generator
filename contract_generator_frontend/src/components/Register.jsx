@@ -40,7 +40,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5002/api/register', {
+      const response = await fetch('https://biancomeister.pythonanywhere.com/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
